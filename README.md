@@ -110,44 +110,57 @@ the right versions of dependencies (vs. whatever you may already have in your `G
 grpcurl -help
 ```
 
+* arguments
+  * MUST be passed before
+    * server address &
+    * method name
+
 ### Invoking RPCs
 
-* TODO:
-Invoking an RPC on a trusted server (e.g. TLS without self-signed key or custom CA)
-that requires no client certs and supports server reflection is the simplest thing to
-do with `grpcurl`. This minimal invocation sends an empty request body:
-```shell
-grpcurl grpc.server.com:443 my.custom.server.Service/Method
+* | trusted server / supports server reflection
+  * trusted server
+    * == TLS / NO
+      * self-signed key or
+      * custom CA
+  *  SIMPLEST thing
+  * _Examples:_
+    * _Example1:_ invocation / sends an empty request body
 
-# no TLS
-grpcurl -plaintext grpc.server.com:80 my.custom.server.Service/Method
-```
+      ```shell
+      grpcurl grpc.server.com:443 my.custom.server.Service/Method
+  
+      # no TLS
+      grpcurl -plaintext grpc.server.com:80 my.custom.server.Service/Method
+      ```
 
-To send a non-empty request, use the `-d` argument. Note that all arguments must come
-*before* the server address and method name:
-```shell
-grpcurl -d '{"id": 1234, "tags": ["foo","bar"]}' \
-    grpc.server.com:443 my.custom.server.Service/Method
-```
+    * _Example2:_ invocation / sends a NON-empty request body
+    
+      ```shell
+      # `-d` argument -- to pass -- request body in JSON format
+      grpcurl -d '{"id": 1234, "tags": ["foo","bar"]}' \
+          grpc.server.com:443 my.custom.server.Service/Method
+      ```
+* if you want to 
+  * pass arguments -> use `-d`
+    * _Example:_ check previous request body example
+  * include `grpcurl` | command pipeline -> use `-d @` -> read the actual request body | stdin
+    * _Example:_ 
 
-As can be seen in the example, the supplied body must be in JSON format. The body will
-be parsed and then transmitted to the server in the protobuf binary format.
+        ```shell
+        grpcurl -d @ grpc.server.com:443 my.custom.server.Service/Method <<EOM
+        {
+        "id": 1234,
+        "tags": [
+            "foor",
+            "bar"
+        ]
+        }
+        EOM
+        ```
 
-If you want to include `grpcurl` in a command pipeline, such as when using `jq` to
-create a request body, you can use `-d @`, which tells `grpcurl` to read the actual
-request body from stdin:
-```shell
-grpcurl -d @ grpc.server.com:443 my.custom.server.Service/Method <<EOM
-{
-  "id": 1234,
-  "tags": [
-    "foor",
-    "bar"
-  ]
-}
-EOM
-```
 ### Adding Headers/Metadata to Request
+
+* TODO:
 Adding of headers / metadata to a rpc request is possible via the `-H name:value` command line option. Multiple headers can be added in a similar fashion.
 Example :
 ```shell
@@ -156,33 +169,38 @@ grpcurl -H header1:value1 -H header2:value2 -d '{"id": 1234, "tags": ["foo","bar
 For more usage guide, check out the help docs via `grpcurl -help`
 
 ### Listing Services
-To list all services exposed by a server, use the "list" verb. When using `.proto` source
-or protoset files instead of server reflection, this lists all services defined in the
-source or protoset files.
-```shell
-# Server supports reflection
-grpcurl localhost:8787 list
 
-# Using compiled protoset files
-grpcurl -protoset my-protos.bin list
+* allows
+  * listing ALL services / 
+    * if you use
+      * server reflection -> -- exposed by a -- server
+      * `.proto` source -> defined | here 
+      * protoset files -> defined | here
+  * seeing ALL methods | particular service
 
-# Using proto sources
-grpcurl -import-path ../protos -proto my-stuff.proto list
-
-# Export proto files (use -proto-out-dir to specify the output directory)
-grpcurl -plaintext -proto-out-dir "out_protos" "localhost:8787" describe my.custom.server.Service
-
-# Export protoset file (use -protoset-out to specify the output file)
-grpcurl -plaintext -protoset-out "out.protoset" "localhost:8787" describe my.custom.server.Service
-
-```
-
-The "list" verb also lets you see all methods in a particular service:
-```shell
-grpcurl localhost:8787 list my.custom.server.Service
-```
+  ```shell
+  # Server supports reflection
+  grpcurl localhost:8787 list
+  
+  # Using compiled protoset files
+  grpcurl -protoset my-protos.bin list
+  
+  # Using proto sources
+  grpcurl -import-path ../protos -proto my-stuff.proto list
+  
+  # Export proto files (use -proto-out-dir to specify the output directory)
+  grpcurl -plaintext -proto-out-dir "out_protos" "localhost:8787" describe my.custom.server.Service
+  
+  # Export protoset file (use -protoset-out to specify the output file)
+  grpcurl -plaintext -protoset-out "out.protoset" "localhost:8787" describe my.custom.server.Service
+  
+  # list methods | particular service
+  grpcurl localhost:8787 list my.custom.server.Service
+  ```
 
 ### Describing Elements
+
+* TODO:
 The "describe" verb will print the type of any symbol that the server knows about
 or that is found in a given protoset file. It also prints a description of that
 symbol, in the form of snippets of proto source. It won't necessarily be the
@@ -208,9 +226,10 @@ are needed to use them.
 
 ### Server Reflection
 
-Without any additional command-line flags, `grpcurl` will try to use [server reflection](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1/reflection.proto).
-
-Examples for how to set up server reflection can be found [here](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md#known-implementations).
+* used by default by `grpcurl`
+  * == NO additional command-line flags
+* [server reflection](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1/reflection.proto)
+* [how to set up](https://github.com/grpc/grpc/blob/master/doc/server-reflection.md#known-implementations)
 
 When using reflection, the server address (host:port or path to Unix socket) is required
 even for "list" and "describe" operations, so that `grpcurl` can connect to the server

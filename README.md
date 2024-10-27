@@ -2,76 +2,76 @@
 [![Build Status](https://circleci.com/gh/fullstorydev/grpcurl/tree/master.svg?style=svg)](https://circleci.com/gh/fullstorydev/grpcurl/tree/master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fullstorydev/grpcurl)](https://goreportcard.com/report/github.com/fullstorydev/grpcurl)
 
-`grpcurl` is a command-line tool that lets you interact with gRPC servers. It's
-basically `curl` for gRPC servers.
-
-The main purpose for this tool is to invoke RPC methods on a gRPC server from the
-command-line. gRPC servers use a binary encoding on the wire
-([protocol buffers](https://developers.google.com/protocol-buffers/), or "protobufs"
-for short). So they are basically impossible to interact with using regular `curl`
-(and older versions of `curl` that do not support HTTP/2 are of course non-starters).
-This program accepts messages using JSON encoding, which is much more friendly for both
-humans and scripts.
-
-With this tool you can also browse the schema for gRPC services, either by querying
-a server that supports [server reflection](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1/reflection.proto),
-by reading proto source files, or by loading in compiled "protoset" files (files that contain
-encoded file [descriptor protos](https://github.com/google/protobuf/blob/master/src/google/protobuf/descriptor.proto)).
-In fact, the way the tool transforms JSON request data into a binary encoded protobuf
-is using that very same schema. So, if the server you interact with does not support
-reflection, you will either need the proto source files that define the service or need
-protoset files that `grpcurl` can use.
-
-This repo also provides a library package, `github.com/fullstorydev/grpcurl`, that has
-functions for simplifying the construction of other command-line tools that dynamically
-invoke gRPC endpoints. This code is a great example of how to use the various packages of
-the [protoreflect](https://godoc.org/github.com/jhump/protoreflect) library, and shows
-off what they can do.
-
-See also the [`grpcurl` talk at GopherCon 2018](https://www.youtube.com/watch?v=dDr-8kbMnaw).
+* == CL tool / -- lets interact with -- gRPC servers
+  * == `curl` -- for -- gRPC servers
+  * goal
+    * invoke RPC methods | gRPC server -- from the -- CL
+  * available inputs
+    * 👀[messages](https://protobuf.dev/overview/) -- via -- JSON encoding 👀
+  * allows ALSO
+    * browsing the schema -- for -- gRPC services
+      * via 
+        * querying a server / supports [server reflection](https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1/reflection.proto)
+        * reading ".proto"
+        * loading | compiled "protoset" files
+          * := files / contain encoded file [descriptor protos](https://github.com/google/protobuf/blob/master/src/google/protobuf/descriptor.proto) 
+* gRPC servers -- use a -- binary encoding | wire ([protocol buffers](https://developers.google.com/protocol-buffers/))
+  * -> impossible to interact -- via -- `curl`
+* `github.com/fullstorydev/grpcurl`
+  * == library package / 
+    * functions -- simplify the -- construction of other CL tools / -- dynamically invoke -- gRPC endpoints
+* check [`grpcurl` talk at GopherCon 2018](https://www.youtube.com/watch?v=dDr-8kbMnaw)
+  * TODO: Create a file to take notes
 
 ## Features
-`grpcurl` supports all kinds of RPC methods, including streaming methods. You can even
-operate bi-directional streaming methods interactively by running `grpcurl` from an
-interactive terminal and using stdin as the request body!
 
-`grpcurl` supports both secure/TLS servers _and_ plain-text servers (i.e. no TLS) and has
-numerous options for TLS configuration. It also supports mutual TLS, where the client is
-required to present a client certificate.
-
-As mentioned above, `grpcurl` works seamlessly if the server supports the reflection
-service. If not, you can supply the `.proto` source files or you can supply protoset
-files (containing compiled descriptors, produced by `protoc`) to `grpcurl`.
+* support
+  * ALL kinds of RPC methods
+    * _Examples:_
+      * streaming methods
+      * operate bi-directional streaming methods interactively -- via -- 
+        * running `grpcurl` | interactive terminal &
+        * using stdin -- as the -- request body
+  * secure/TLS servers / 
+    * several options for TLS configuration
+  * plain-text servers (== NO TLS)
+  * mutual TLS
+    * requirements
+      * client -- is required to -- present a client certificate
 
 ## Installation
 
 ### Binaries
 
-Download the binary from the [releases](https://github.com/fullstorydev/grpcurl/releases) page.
+* Download the binary | [releases](https://github.com/fullstorydev/grpcurl/releases)
 
 ### Homebrew (macOS)
 
-On macOS, `grpcurl` is available via Homebrew:
-```shell
-brew install grpcurl
-```
+  ```shell
+  brew install grpcurl
+  ```
 
 ### Docker
 
-For platforms that support Docker, you can download an image that lets you run `grpcurl`:
-```shell
-# Download image
-docker pull fullstorydev/grpcurl:latest
-# Run the tool
-docker run fullstorydev/grpcurl api.grpc.me:443 list
-```
-Note that there are some pitfalls when using docker:
-- If you need to interact with a server listening on the host's loopback network, you must specify the host as `host.docker.internal` instead of `localhost` (for Mac or Windows) _OR_ have the container use the host network with `-network="host"` (Linux only).
-- If you need to provide proto source files or descriptor sets, you must mount the folder containing the files as a volume (`-v $(pwd):/protos`) and adjust the import paths to container paths accordingly.
-- If you want to provide the request message via stdin, using the `-d @` option, you need to use the `-i` flag on the docker command.
+* 
+  ```shell
+  # Download image
+  docker pull fullstorydev/grpcurl:latest
+  # Run the tool
+  docker run fullstorydev/grpcurl api.grpc.me:443 list
+  ```
+  * notes
+    * if you need to interact with a server / listens | host's loopback network -> specify the host as
+      * | Mac or Windows, `host.docker.internal` _OR_ 
+      * | Linux, `-network="host"`
+    * if you need to provide ".proto" OR descriptor sets -> 
+      * mount the folder / contains the files -- as a -- volume (`-v $(pwd):/protos`) &
+      * adjust the import paths -- to -- container paths
+    * if you want to provide the request message -- via -- stdin (`-d @` option) -> use the `-i` flag | docker command
 
 ### Other Packages
 
+* TODO:
 There are numerous other ways to install `grpcurl`, thanks to support from third parties that
 have created recipes/packages for it. These include other ways to install `grpcurl` on a variety
 of environments, including Windows and myriad Linux distributions.
@@ -80,6 +80,7 @@ You can see more details and the full list of other packages for `grpcurl` at _r
 https://repology.org/project/grpcurl/information
 
 ### From Source
+
 If you already have the [Go SDK](https://golang.org/doc/install) installed, you can use the `go`
 tool to install `grpcurl`:
 ```shell
@@ -101,16 +102,17 @@ dependencies by running `make updatedeps`. Or, if you are using Go 1.11 or 1.12,
 can add `GO111MODULE=on` as a prefix to the commands above, which will also build using
 the right versions of dependencies (vs. whatever you may already have in your `GOPATH`).
 
+---
+
 ## Usage
-The usage doc for the tool explains the numerous options:
+
 ```shell
 grpcurl -help
 ```
 
-In the sections below, you will find numerous examples demonstrating how to use
-`grpcurl`.
-
 ### Invoking RPCs
+
+* TODO:
 Invoking an RPC on a trusted server (e.g. TLS without self-signed key or custom CA)
 that requires no client certs and supports server reflection is the simplest thing to
 do with `grpcurl`. This minimal invocation sends an empty request body:
